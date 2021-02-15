@@ -34,8 +34,8 @@ public class VaccineControllerImpl implements VaccineController {
     }
 
     @Override
-    public ResponseEntity<Page<VaccineResponseDTO>> findAllVaccines(Pageable pageable) {
-        return ResponseEntity.ok(vaccineService.findAllVaccines(pageable));
+    public ResponseEntity<Page<VaccineResponseDTO>> findAllVaccines(String cpf, String name, Pageable pageable) {
+        return ResponseEntity.ok(vaccineService.findAllVaccines(cpf, name, pageable));
     }
 
     @Override

@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 public interface VaccineService {
     VaccineResponseDTO createVaccine(VaccineRequestDTO vaccineCreateRequest);
 
-    Page<VaccineResponseDTO> findAllVaccines(Pageable pageable);
+    Page<VaccineResponseDTO> findAllVaccines(String cpf, String name, Pageable pageable);
 
     VaccineResponseDTO findVaccineById(Long id);
 

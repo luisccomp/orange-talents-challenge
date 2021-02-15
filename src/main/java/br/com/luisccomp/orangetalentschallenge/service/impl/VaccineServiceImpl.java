@@ -14,6 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import static br.com.luisccomp.orangetalentschallenge.domain.repository.specifications.VaccineSpecifications.hasNameLike;
+import static br.com.luisccomp.orangetalentschallenge.domain.repository.specifications.VaccineSpecifications.hasUserWithCpf;
+import static org.springframework.data.jpa.domain.Specification.where;
+
 @Service
 public class VaccineServiceImpl implements VaccineService {
 
@@ -39,8 +43,12 @@ public class VaccineServiceImpl implements VaccineService {
     }
 
     @Override
-    public Page<VaccineResponseDTO> findAllVaccines(Pageable pageable) {
-        return vaccineRepository.findAll(pageable)
+    public Page<VaccineResponseDTO> findAllVaccines(String cpf, String name, Pageable pageable) {
+        return vaccineRepository.findAll(
+                where(hasUserWithCpf(cpf))
+                        .and(where(hasNameLike(name))),
+                pageable
+        )
                 .map(vaccine -> classMapper.map(vaccine, VaccineResponseDTO.class));
     }
 

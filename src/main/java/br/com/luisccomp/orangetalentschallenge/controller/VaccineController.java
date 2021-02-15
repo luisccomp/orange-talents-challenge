@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping("/api/vaccines")
 public interface VaccineController {
@@ -22,7 +23,11 @@ public interface VaccineController {
     ResponseEntity<VaccineResponseDTO> createVaccine(@RequestBody @Valid VaccineRequestDTO vaccineCreateRequest);
 
     @GetMapping
-    ResponseEntity<Page<VaccineResponseDTO>> findAllVaccines(Pageable pageable);
+    ResponseEntity<Page<VaccineResponseDTO>> findAllVaccines(
+            @RequestParam(required = false) String cpf,
+            @RequestParam(required = false) String name,
+            Pageable pageable
+    );
 
     @GetMapping("/{id}")
     ResponseEntity<VaccineResponseDTO> findVaccineById(@PathVariable Long id);

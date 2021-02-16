@@ -15,7 +15,7 @@ public class VaccineSpecifications {
 
     public static Specification<Vaccine> hasNameLike(String name) {
         if (name != null) {
-        return (vaccine, query, builder) -> builder.like(vaccine.get("name"), "%" + name + "%");
+            return (vaccine, query, builder) -> builder.like(vaccine.get("name"), "%" + name + "%");
         } else {
             return null;
         }

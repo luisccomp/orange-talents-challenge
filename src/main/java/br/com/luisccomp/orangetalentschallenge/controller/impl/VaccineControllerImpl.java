@@ -1,7 +1,7 @@
 package br.com.luisccomp.orangetalentschallenge.controller.impl;
 
 import br.com.luisccomp.orangetalentschallenge.controller.VaccineController;
-import br.com.luisccomp.orangetalentschallenge.domain.model.request.VaccineRequestDTO;
+import br.com.luisccomp.orangetalentschallenge.domain.model.request.VaccineCreateRequestDTO;
 import br.com.luisccomp.orangetalentschallenge.domain.model.request.VaccineUpdateRequestDTO;
 import br.com.luisccomp.orangetalentschallenge.domain.model.response.VaccineResponseDTO;
 import br.com.luisccomp.orangetalentschallenge.service.VaccineService;
@@ -24,7 +24,7 @@ public class VaccineControllerImpl implements VaccineController {
     }
 
     @Override
-    public ResponseEntity<VaccineResponseDTO> createVaccine(@Valid VaccineRequestDTO vaccineCreateRequest) {
+    public ResponseEntity<VaccineResponseDTO> createVaccine(@Valid VaccineCreateRequestDTO vaccineCreateRequest) {
         var vaccine = vaccineService.createVaccine(vaccineCreateRequest);
 
         var uri = URI.create("/api/vaccines/" + vaccine.getId());

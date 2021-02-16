@@ -8,7 +8,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
-public class VaccineRequestDTO {
+public class VaccineCreateRequestDTO {
 
     @JsonProperty("name")
     @NotBlank
@@ -24,11 +24,11 @@ public class VaccineRequestDTO {
     @NotNull
     private Long userId;
 
-    public VaccineRequestDTO() {
+    public VaccineCreateRequestDTO() {
 
     }
 
-    public VaccineRequestDTO(@NotBlank String name, @NotNull LocalDate realizationDate) {
+    public VaccineCreateRequestDTO(@NotBlank String name, @NotNull LocalDate realizationDate) {
         this.name = name;
         this.realizationDate = realizationDate;
     }

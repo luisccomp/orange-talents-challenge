@@ -1,6 +1,6 @@
 package br.com.luisccomp.orangetalentschallenge.controller;
 
-import br.com.luisccomp.orangetalentschallenge.domain.model.request.VaccineRequestDTO;
+import br.com.luisccomp.orangetalentschallenge.domain.model.request.VaccineCreateRequestDTO;
 import br.com.luisccomp.orangetalentschallenge.domain.model.request.VaccineUpdateRequestDTO;
 import br.com.luisccomp.orangetalentschallenge.domain.model.response.VaccineResponseDTO;
 import javax.validation.Valid;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface VaccineController {
 
     @PostMapping
-    ResponseEntity<VaccineResponseDTO> createVaccine(@RequestBody @Valid VaccineRequestDTO vaccineCreateRequest);
+    ResponseEntity<VaccineResponseDTO> createVaccine(@RequestBody @Valid VaccineCreateRequestDTO vaccineCreateRequest);
 
     @GetMapping
     ResponseEntity<Page<VaccineResponseDTO>> findAllVaccines(

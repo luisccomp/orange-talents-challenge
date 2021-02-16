@@ -2,7 +2,7 @@ package br.com.luisccomp.orangetalentschallenge.service.impl;
 
 import br.com.luisccomp.orangetalentschallenge.core.mapper.ClassMapper;
 import br.com.luisccomp.orangetalentschallenge.domain.model.entity.Vaccine;
-import br.com.luisccomp.orangetalentschallenge.domain.model.request.VaccineRequestDTO;
+import br.com.luisccomp.orangetalentschallenge.domain.model.request.VaccineCreateRequestDTO;
 import br.com.luisccomp.orangetalentschallenge.domain.model.request.VaccineUpdateRequestDTO;
 import br.com.luisccomp.orangetalentschallenge.domain.model.response.VaccineResponseDTO;
 import br.com.luisccomp.orangetalentschallenge.domain.repository.VaccineRepository;
@@ -33,7 +33,7 @@ public class VaccineServiceImpl implements VaccineService {
     }    
 
     @Override
-    public VaccineResponseDTO createVaccine(VaccineRequestDTO vaccineCreateRequest) {
+    public VaccineResponseDTO createVaccine(VaccineCreateRequestDTO vaccineCreateRequest) {
         var user = userService.getUserById(vaccineCreateRequest.getUserId());
 
         var vaccine = classMapper.map(vaccineCreateRequest, Vaccine.class);

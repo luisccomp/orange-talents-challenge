@@ -8,10 +8,15 @@ import br.com.luisccomp.orangetalentschallenge.domain.repository.UserRepository;
 import br.com.luisccomp.orangetalentschallenge.exception.BadRequestException;
 import br.com.luisccomp.orangetalentschallenge.exception.NotFoundException;
 import br.com.luisccomp.orangetalentschallenge.service.UserService;
+import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import static br.com.luisccomp.orangetalentschallenge.domain.repository.specifications.UserSpecifications.fromBirthdate;
+import static br.com.luisccomp.orangetalentschallenge.domain.repository.specifications.UserSpecifications.toBirthdate;
+import static org.springframework.data.jpa.domain.Specification.where;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -37,9 +42,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserResponseDTO> findAllUsers(Pageable pageable) {
-        return userRepository.findAll(pageable)
-                .map(user -> classMapper.map(user, UserResponseDTO.class));
+    public Page<UserResponseDTO> findAllUsers(LocalDate fromDate, LocalDate toDate, Pageable pageable) {
+        return userRepository.findAll(
+                where(fromBirthdate(fromDate))
+                        .and(where(toBirthdate(toDate))),
+                pageable
+        ).map(user -> classMapper.map(user, UserResponseDTO.class));
     }
 
     @Override

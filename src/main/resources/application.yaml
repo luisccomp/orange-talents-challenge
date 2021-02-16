@@ -5,6 +5,8 @@ spring:
     password: docker@1993#
 
   jpa:
+    show_sql: true
     properties:
       hibernate:
+        format_sql: true
         enable_lazy_load_no_trans: true

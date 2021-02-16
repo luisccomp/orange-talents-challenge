@@ -5,6 +5,7 @@ import br.com.luisccomp.orangetalentschallenge.domain.model.request.UserRequestD
 import br.com.luisccomp.orangetalentschallenge.domain.model.response.UserResponseDTO;
 import br.com.luisccomp.orangetalentschallenge.service.UserService;
 import java.net.URI;
+import java.time.LocalDate;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,8 +34,8 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Page<UserResponseDTO>> findAllUsers(Pageable pageable) {
-        return ResponseEntity.ok(userService.findAllUsers(pageable));
+    public ResponseEntity<Page<UserResponseDTO>> findAllUsers(LocalDate fromDate, LocalDate toDate, Pageable pageable) {
+        return ResponseEntity.ok(userService.findAllUsers(fromDate, toDate, pageable));
     }
 
     @Override

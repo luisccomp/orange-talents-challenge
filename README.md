@@ -1,5 +1,11 @@
 # Implementando um sistema para controle de vacinação
 
+- Author: Luís Carlos Silva Júnior
+- Email: luisccomp@gmail.com
+- Github: https://github.com/luisccomp
+
+
+
 Nessa publicação vou explicar como implementar um sistema de controle de aplicação de vacinas utilizando *Spring* e *Hibernate*, mas **atenção**: esse não será um tutorial de programação, mas sim um texto explicando como implementar um sistema de aplicação de vacinas com Spring, quais tecnologias eu utilizaria para implementar o sistema e algumas dicas de como eu faria. Sem mais delongas, introduzirei a lista de tecnologias do Spring utilizadas no Projeto. Para desenvolver esse projeto estou utilizando Java 14.
 
 Para esse projeto utilizarei as seguintes tecnologias para o seu desenvolvimento (além do Spring + Hibernate):
@@ -37,7 +43,7 @@ O driver MySQL é uma biblioteca que permite que nossa aplicação se comunique 
 
 ## Flyway Migration
 
-Uma funcionalidade bastante útil do Hibernate, que é bastante utilizada pelos desenvolvedores, é a possibilidade de gerar o banco de dados da aplicação apenas "olhando" para as classes do projeto. Apesar de útil, esse recurso pode ser perigoso se não for bem utilizado. Por outro lado, as vezes é necessário guardar na aplicação um histórico de todas as alterações feitas no banco de dados durante o processo de desenvolvimento da aplicação. Quais colunas foram adicionadas/removidas de uma tabela, quais foram as novas tabelas criadas, etc. Esse processo de criar um histórico de modificações no banco de dados se chama *Migration*.
+Uma funcionalidade bastante útil do Hibernate, que é bastante utilizada pelos desenvolvedores, é a possibilidade de gerar o banco de dados da aplicação a partir das classes do projeto. Apesar de útil, esse recurso pode ser perigoso se não for bem utilizado. Por outro lado, as vezes é necessário guardar um histórico de todas as alterações feitas no banco de dados durante o processo de desenvolvimento da aplicação. Quais colunas foram adicionadas/removidas de uma tabela, quais foram as novas tabelas criadas, etc. Esse processo de criar um histórico de modificações no banco de dados se chama *Migration*.
 
 # Especificações do projeto
 
@@ -83,7 +89,7 @@ CREATE TABLE vaccines (
 
 ## Implementando as entidades
 
-Vou começar apresentando as entidades do projeto. Conforme o código SQL apresentado anteriormente, decidi implementar as entidades da seguinte forma: uma vacina não pode existir sem um usuário, o que indica que a vacina é uma entidade fraca no nosso relacionamento. As entidades serão anotadas com uma anotação chamada `@Entity` para indicar que a classe em questão é uma entidade do banco, uma anotação `@Table` para indicar a tabela que ela se refere e seus atributos com `@Column` para mapeá-los para suas respectivas colunas. A estratégia `IDENTITY` apenas informa ao SGBD que a chave primaria é uma coluna `auto_increment` e nem todos os bancos de dados podem suportar essa opção. A chave primária é anotada com `@Id` e seu valor é incrementado automáticamente, conforme a estratégia de geração atribuída a ela. A partir do código SQL, as classes que representaram essas entidades respectivamente são:
+Vou começar apresentando as entidades do projeto. Conforme o código SQL apresentado anteriormente, decidi implementar as entidades da seguinte forma: uma vacina não pode existir sem um usuário, o que indica que a vacina é uma entidade fraca no nosso relacionamento. As entidades serão anotadas com uma anotação chamada `@Entity` para indicar que a classe em questão é uma entidade do banco, uma anotação `@Table` para indicar a tabela que ela se refere e seus atributos com `@Column` para mapeá-los para suas respectivas colunas. A estratégia `IDENTITY` apenas informa ao SGBD que a chave primaria é uma coluna `auto_increment`. Vale lembrar  que nem todos os bancos de dados podem suportar essa opção. A chave primária é anotada com `@Id` e seu valor é incrementado automáticamente, conforme a estratégia de geração atribuída a ela. A partir do código SQL, as classes que representaram essas entidades respectivamente são:
 
 Implementação da entidade Usuário:
 
@@ -271,7 +277,7 @@ public class NotFoundException extends BaseHttpException {
 }
 ```
 
-Também criei uma classe para armazenar dados para respostas personalizadas de erro e que sejam mais legíveis para o usuário que está consumindo a API ler, contendo apenas o essencial:
+Também foi criada uma classe para representar uma mensagem de erro, caso ocorra um comportamento inesperado. Essa classe possui somente a informação essencial para o usuário que está consumindo a API.
 
 ```Java
 package br.com.luisccomp.orangetalentschallenge.domain.model.response;
@@ -430,7 +436,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ObjectMapperClassMapper implements ClassMapper {
+public class ObjectMapperClassMapper implements ValueMapper {
 
     private final ObjectMapper objectMapper;
 
@@ -640,7 +646,7 @@ Note que, tanto na interface quanto na implementação, o método "findAllUsers"
 ```java
 package br.com.luisccomp.orangetalentschallenge.service.impl;
 
-import br.com.luisccomp.orangetalentschallenge.core.mapper.ClassMapper;
+import br.com.luisccomp.orangetalentschallenge.core.mapper.ValueMapper;
 import br.com.luisccomp.orangetalentschallenge.domain.model.entity.User;
 import br.com.luisccomp.orangetalentschallenge.domain.model.request.UserRequestDTO;
 import br.com.luisccomp.orangetalentschallenge.domain.model.response.UserResponseDTO;
@@ -662,12 +668,12 @@ import static org.springframework.data.jpa.domain.Specification.where;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final ClassMapper classMapper;
+    private final ValueMapper valueMapper;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, ClassMapper classMapper) {
+    public UserServiceImpl(UserRepository userRepository, ValueMapper valueMapper) {
         this.userRepository = userRepository;
-        this.classMapper = classMapper;
+        this.valueMapper = valueMapper;
     }
 
     @Override
@@ -676,9 +682,9 @@ public class UserServiceImpl implements UserService {
                 userRepository.existsByEmail(userCreateRequest.getEmail()))
             throw new BadRequestException("User email or CPF must be unique");
 
-        var user = classMapper.map(userCreateRequest, User.class);
+        var user = valueMapper.map(userCreateRequest, User.class);
 
-        return classMapper.map(userRepository.save(user), UserResponseDTO.class);
+        return valueMapper.map(userRepository.save(user), UserResponseDTO.class);
     }
 
     @Override
@@ -687,7 +693,7 @@ public class UserServiceImpl implements UserService {
                 where(fromBirthdate(fromDate))
                         .and(where(toBirthdate(toDate))),
                 pageable
-        ).map(user -> classMapper.map(user, UserResponseDTO.class));
+        ).map(user -> valueMapper.map(user, UserResponseDTO.class));
     }
 
     @Override
@@ -695,7 +701,7 @@ public class UserServiceImpl implements UserService {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        return classMapper.map(user, UserResponseDTO.class);
+        return valueMapper.map(user, UserResponseDTO.class);
     }
 
     @Override
@@ -712,7 +718,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(user.getEmail());
         user.setBirthdate(user.getBirthdate());
 
-        return classMapper.map(userRepository.save(user), UserResponseDTO.class);
+        return valueMapper.map(userRepository.save(user), UserResponseDTO.class);
     }
 
     @Override
@@ -735,7 +741,7 @@ public class UserServiceImpl implements UserService {
 
 ### Controller de usuários
 
-Para a controller de usuários, fiz uso de interfaces por questões de legibilidade. Quero evitar o uso de muitas annotations na em sua implementação, deixando-as na interface. A interface contém as annotations responsáveis pela validação, mapeamento de dados e as rotas com seus respectivos métodos HTTP. A anotação `@RequestBody` serve para mapear o conteúdo do corpo da requisição para o parâmetro dentro da action da controller, já o `@Valid` verifica se os campos são válidos. Já a `@PathVariable`  faz o binding de uma variável do caminho da url para um parâmetro (de mesmo nome) do método.
+Para a controller de usuários, fiz uso de interfaces por questões de legibilidade. Quero evitar o uso de muitas annotations em sua implementação, deixando-as na interface. A interface contém as annotations responsáveis pela validação, mapeamento de dados e as rotas com seus respectivos métodos HTTP. A anotação `@RequestBody` serve para mapear o conteúdo do corpo da requisição para o parâmetro dentro da action da controller, já o `@Valid` verifica se os campos são válidos. Já a `@PathVariable`  faz o binding de uma variável do caminho da url para um parâmetro (de mesmo nome) do método.
 
 Assim, a interface da controller ficaria assim:
 
@@ -1059,7 +1065,7 @@ Note que, tanto na interface quanto na implementação, o método "findAllVaccin
 ```java
 package br.com.luisccomp.orangetalentschallenge.service.impl;
 
-import br.com.luisccomp.orangetalentschallenge.core.mapper.ClassMapper;
+import br.com.luisccomp.orangetalentschallenge.core.mapper.ValueMapper;
 import br.com.luisccomp.orangetalentschallenge.domain.model.entity.Vaccine;
 import br.com.luisccomp.orangetalentschallenge.domain.model.request.VaccineCreateRequestDTO;
 import br.com.luisccomp.orangetalentschallenge.domain.model.request.VaccineUpdateRequestDTO;
@@ -1081,13 +1087,13 @@ import static org.springframework.data.jpa.domain.Specification.where;
 public class VaccineServiceImpl implements VaccineService {
 
     private final VaccineRepository vaccineRepository;
-    private final ClassMapper classMapper;    
+    private final ValueMapper valueMapper;    
     private final UserService userService;
 
     @Autowired
-    public VaccineServiceImpl(VaccineRepository vaccineRepository, ClassMapper classMapper, UserService userService) {
+    public VaccineServiceImpl(VaccineRepository vaccineRepository, ValueMapper valueMapper, UserService userService) {
         this.vaccineRepository = vaccineRepository;
-        this.classMapper = classMapper;
+        this.valueMapper = valueMapper;
         this.userService = userService;
     }    
 
@@ -1095,10 +1101,10 @@ public class VaccineServiceImpl implements VaccineService {
     public VaccineResponseDTO createVaccine(VaccineCreateRequestDTO vaccineCreateRequest) {
         var user = userService.getUserById(vaccineCreateRequest.getUserId());
 
-        var vaccine = classMapper.map(vaccineCreateRequest, Vaccine.class);
+        var vaccine = valueMapper.map(vaccineCreateRequest, Vaccine.class);
         vaccine.setUser(user);
 
-        return classMapper.map(vaccineRepository.save(vaccine), VaccineResponseDTO.class);
+        return valueMapper.map(vaccineRepository.save(vaccine), VaccineResponseDTO.class);
     }
 
     @Override
@@ -1108,7 +1114,7 @@ public class VaccineServiceImpl implements VaccineService {
                         .and(where(hasNameLike(name))),
                 pageable
         )
-                .map(vaccine -> classMapper.map(vaccine, VaccineResponseDTO.class));
+                .map(vaccine -> valueMapper.map(vaccine, VaccineResponseDTO.class));
     }
 
     @Override
@@ -1116,7 +1122,7 @@ public class VaccineServiceImpl implements VaccineService {
         var vaccine = vaccineRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Vaccine not found"));
 
-        return classMapper.map(vaccine, VaccineResponseDTO.class);
+        return valueMapper.map(vaccine, VaccineResponseDTO.class);
     }
 
     @Override
@@ -1127,7 +1133,7 @@ public class VaccineServiceImpl implements VaccineService {
         vaccine.setName(vaccineUpdateRequest.getName());
         vaccine.setRealizationDate(vaccineUpdateRequest.getRealizationDate());
 
-        return classMapper.map(vaccineRepository.save(vaccine), VaccineResponseDTO.class);
+        return valueMapper.map(vaccineRepository.save(vaccine), VaccineResponseDTO.class);
     }
 
     @Override
@@ -1188,6 +1194,8 @@ public interface VaccineController {
 
 }
 ```
+
+Porque o verbo HTTP para atualizar a vacina é PATCH quando na *controller* de usuários utilizamos PUT? Porque no caso das vacinas, estou fazendo uma atualização parcial do recurso, ou seja, apenas um subconjunto de propriedades foi atualizado em vez do recurso como um todo.
 
 ```java
 package br.com.luisccomp.orangetalentschallenge.controller.impl;
